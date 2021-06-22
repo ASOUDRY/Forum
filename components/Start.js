@@ -13,16 +13,19 @@ export default class Start extends React.Component {
 
       
   render() {
-
+    // button that triggers Onpress to go to the next page.
     const AppButton = ({ onPress, title }) => (
       <TouchableOpacity onPress={onPress} style={styles.appButtonContainer}>
         <Text style={styles.appButtonText}>{title}</Text>
       </TouchableOpacity>
     );
     return (
+      // the background element
       <ImageBackground source={require('../assets/background.png')} style={styles.backImage}>
         <Text style={styles.title} >Forum</Text>
         <View style={styles.container}>
+
+          {/* Name input box */}
         <TextInput styles={styles.nameBox}
          
           onChangeText={(name) => this.setState(
@@ -34,6 +37,7 @@ export default class Start extends React.Component {
          <Text style={styles.text}>
           Choose Background Color:
         </Text>
+        {/* The foor buttons to choose the background style. Choosing color is still not operational though */}
         <View style={styles.colorSelection}>
           <TouchableOpacity
             onPress={() => this.setState({ color: '#090C08'})}
@@ -52,7 +56,7 @@ export default class Start extends React.Component {
             style={[styles.colorButton, styles.color4]}
           />
         </View>
-
+        {/* the actual button when rendered */}
         <AppButton size="sm" backgroundColor="#007bff" 
         title="Enter the Forum"
         onPress={() => this.props.navigation.navigate('Chat', {name: this.state.name, color: this.state.name})}
