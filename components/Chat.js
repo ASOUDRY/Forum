@@ -3,6 +3,10 @@ import React from 'react';
 import { View, Platform, KeyboardAvoidingView } from 'react-native';
 
 
+const firebase = require('firebase');
+require('firebase/firestore');
+
+
 export default class Chat extends React.Component {
   constructor(props) {
     super(props);
@@ -10,9 +14,31 @@ export default class Chat extends React.Component {
       messages: [],
       name:  this.props.route.params.name
     }
+
+    let firebaseConfig = {
+      apiKey: "AIzaSyB4oAvBUbZyk7-9Yd5H7hp8AuMSzXjSO4Q",
+      authDomain: "forum-1f07e.firebaseapp.com",
+      projectId: "forum-1f07e",
+      storageBucket: "forum-1f07e.appspot.com",
+      messagingSenderId: "212591689644",
+      appId: "1:212591689644:web:b4362edd93eff024b1c409",
+      measurementId: "G-BL59Q28M06"
+    };
+
+     // Initialize Firebase
+     if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    else {
+      firebase.app()
+    }
+
+    this.referenceList = firebase.firestore().collection("Messages")
+
   }
 
   componentDidMount() {
+    this.unsubscribe = firebase.firestore().collection("Messages").onSnapshot(this.onCollectionUpdate)
     this.setState({
       // default messages dispatched when the user enters the chat
       messages: [
@@ -39,13 +65,37 @@ export default class Chat extends React.Component {
           system: true,
          },
       ],
+      
     })
+    this.addMessage()
+    // firebase.auth().onAuthStateChanged()
   }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+ }
+
+
+ addMessage() {
+   const message = this.state.messages[0]
+  this.referenceLists.add({
+      test: "test"
+      // text: message.text || "",
+      // createdAt: message.createdAt,
+      // user: message.user.n,
+      // image: message.image || "",
+      // location: message.location || null,
+      // sent: true,
+  });
+}
+
+
 // function to send the messages in the message state to chat.
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }))
+    this.addMessage();
   }
 // changes the speach bubble to set a color, in this case black.""
   renderBubble(props) {
