@@ -16,13 +16,13 @@ export default class Chat extends React.Component {
     }
 
     let firebaseConfig = {
-      apiKey: "AIzaSyB4oAvBUbZyk7-9Yd5H7hp8AuMSzXjSO4Q",
-      authDomain: "forum-1f07e.firebaseapp.com",
-      projectId: "forum-1f07e",
-      storageBucket: "forum-1f07e.appspot.com",
-      messagingSenderId: "212591689644",
-      appId: "1:212591689644:web:b4362edd93eff024b1c409",
-      measurementId: "G-BL59Q28M06"
+    apiKey: "AIzaSyBRDZym0HeoUzADYSuRtCxkrhY5f32Hqbs",
+    authDomain: "forum-292a4.firebaseapp.com",
+    projectId: "forum-292a4",
+    storageBucket: "forum-292a4.appspot.com",
+    messagingSenderId: "642873887082",
+    appId: "1:642873887082:web:7c770526331c3eca277d13",
+    measurementId: "G-XH2J9YX9ZH"
     };
 
      // Initialize Firebase
@@ -32,13 +32,24 @@ export default class Chat extends React.Component {
     else {
       firebase.app()
     }
-
-    this.referenceList = firebase.firestore().collection("Messages")
-
   }
 
   componentDidMount() {
-    this.unsubscribe = firebase.firestore().collection("Messages").onSnapshot(this.onCollectionUpdate)
+    this.chatroomMessages = firebase.firestore().collection('chatroom')
+
+    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        await firebase.auth().signInAnonymously();
+      }
+    
+      //update user state with currently active user data
+      this.setState({
+        uid: user.uid,
+      });
+
+    this.messageSnapshot = this.chatroomMessages.onSnapshot(this.onCollectionUpdate);  
+    });
+
     this.setState({
       // default messages dispatched when the user enters the chat
       messages: [
@@ -63,39 +74,40 @@ export default class Chat extends React.Component {
           text: this.state.name + ' ' + 'has entered the chat',
           createdAt: new Date(),
           system: true,
-         },
+         }
       ],
-      
     })
-    this.addMessage()
-    // firebase.auth().onAuthStateChanged()
   }
 
   componentWillUnmount() {
-    this.unsubscribe();
+    this.messageSnapshot();
  }
 
+ addMessages(messages) {
+   this.chatroomMessages.add({
+     _id: messages[0]._id,
+     createdAt: messages[0].createdAt,
+     text: messages[0].text,
+     user: messages[0].user
+   })
+ }
 
- addMessage() {
-   const message = this.state.messages[0]
-  this.referenceLists.add({
-      test: "test"
-      // text: message.text || "",
-      // createdAt: message.createdAt,
-      // user: message.user.n,
-      // image: message.image || "",
-      // location: message.location || null,
-      // sent: true,
-  });
-}
-
+ onCollectionUpdate = (querySnapshot) => {
+   const list = []
+   querySnapshot.forEach(
+     (doc) => {
+      var data = (doc.data)
+      console.log(data)
+      }
+     )
+ }
 
 // function to send the messages in the message state to chat.
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }))
-    this.addMessage();
+    this.addMessages(messages);
   }
 // changes the speach bubble to set a color, in this case black.""
   renderBubble(props) {
@@ -126,7 +138,10 @@ export default class Chat extends React.Component {
          <GiftedChat
             renderBubble={this.renderBubble.bind(this)}
             messages={this.state.messages}
-            onSend={messages => this.onSend(messages)}
+            onSend={messages => {
+              this.onSend(messages)
+              this.addMessages(messages)
+            }}
             user={{
               _id: 1,
             }}
