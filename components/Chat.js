@@ -2,10 +2,8 @@ import { GiftedChat, Bubble } from 'react-native-gifted-chat'
 import React from 'react';
 import { View, Platform, KeyboardAvoidingView } from 'react-native';
 
-
 const firebase = require('firebase');
 require('firebase/firestore');
-
 
 export default class Chat extends React.Component {
   constructor(props) {
@@ -35,8 +33,10 @@ export default class Chat extends React.Component {
   }
 
   componentDidMount() {
+    // This function connects to the chatroom object
     this.chatroomMessages = firebase.firestore().collection('chatroom')
 
+    // This authorizes the user anonymoussly
     this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
       if (!user) {
         await firebase.auth().signInAnonymously();
@@ -45,44 +45,43 @@ export default class Chat extends React.Component {
       //update user state with currently active user data
       this.setState({
         uid: user.uid,
+        messages: [
+          {
+            _id: 1,
+            text: 'Hello' + ' ' + this.state.name,
+            createdAt: new Date(),
+            user: {
+              _id: 2,
+              name: 'React Native',
+              avatar: 'https://placeimg.com/140/140/any',
+            },
+           },
+           {
+            _id: 2,
+            text: 'Welcome to the Forum',
+            createdAt: new Date(),
+            system: true,
+           },
+           {
+            _id: 3,
+            text: this.state.name + ' ' + 'has entered the chat',
+            createdAt: new Date(),
+            system: true,
+           }
+        ],
       });
 
-    this.messageSnapshot = this.chatroomMessages.onSnapshot(this.onCollectionUpdate);  
+    // This takes a snapshot of the collection, orders it by creation date, and sends it to this.onCollectionUpdate
+    this.messageSnapshot = this.chatroomMessages.orderBy('createdAt').onSnapshot(this.onCollectionUpdate);
     });
-
-    this.setState({
-      // default messages dispatched when the user enters the chat
-      messages: [
-        {
-          _id: 1,
-          text: 'Hello' + ' ' + this.state.name,
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
-          },
-         },
-         {
-          _id: 2,
-          text: 'Welcome to the Forum',
-          createdAt: new Date(),
-          system: true,
-         },
-         {
-          _id: 3,
-          text: this.state.name + ' ' + 'has entered the chat',
-          createdAt: new Date(),
-          system: true,
-         }
-      ],
-    })
   }
-
+  
   componentWillUnmount() {
-    this.messageSnapshot();
+  this.authUnsubscribe()
+  this.messageSnapshot()
  }
 
+//  Function that adds new messages to the collection
  addMessages(messages) {
    this.chatroomMessages.add({
      _id: messages[0]._id,
@@ -91,15 +90,24 @@ export default class Chat extends React.Component {
      user: messages[0].user
    })
  }
-
+// function that adds messages from the collection to the state
  onCollectionUpdate = (querySnapshot) => {
-   const list = []
-   querySnapshot.forEach(
-     (doc) => {
-      var data = (doc.data)
-      console.log(data)
-      }
-     )
+  //  makes sure it doesn't add functions, except when it loads the first time.
+   if (this.state.messages.length <= 3) {
+    querySnapshot.forEach(
+      (doc) => {
+       var data = (doc.data())
+       this.setState(previousState => ({
+         messages: GiftedChat.append(previousState.messages, {
+           _id: data._id,
+           createdAt: data._createdAt,
+           text: data.text,
+           user: data.user,
+         }),
+       }));
+       }
+      )
+   }
  }
 
 // function to send the messages in the message state to chat.
@@ -140,14 +148,12 @@ export default class Chat extends React.Component {
             messages={this.state.messages}
             onSend={messages => {
               this.onSend(messages)
-              this.addMessages(messages)
             }}
             user={{
-              _id: 1,
+              _id: this.state.uid,
             }}
           />      
-       </View>
-          
+       </View>       
     ) 
   }
 }
