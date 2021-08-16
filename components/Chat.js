@@ -1,6 +1,10 @@
-import { GiftedChat, Bubble } from 'react-native-gifted-chat'
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import React from 'react';
-import { View, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, KeyboardAvoidingView, Button } from 'react-native';
+import NetInfo from "@react-native-community/netinfo";
+
+
+import { AsyncStorage } from 'react-native';
 
 const firebase = require('firebase');
 require('firebase/firestore');
@@ -10,7 +14,7 @@ export default class Chat extends React.Component {
     super(props);
     this.state = {
       messages: [],
-      name:  this.props.route.params.name
+      name:  this.props.route.params.name,
     }
 
     let firebaseConfig = {
@@ -32,52 +36,86 @@ export default class Chat extends React.Component {
     }
   }
 
-  componentDidMount() {
-    // This function connects to the chatroom object
-    this.chatroomMessages = firebase.firestore().collection('chatroom')
-
-    // This authorizes the user anonymoussly
-    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-      if (!user) {
-        await firebase.auth().signInAnonymously();
-      }
-    
-      //update user state with currently active user data
-      this.setState({
-        uid: user.uid,
-        messages: [
-          {
-            _id: 1,
-            text: 'Hello' + ' ' + this.state.name,
-            createdAt: new Date(),
-            user: {
-              _id: 2,
-              name: 'React Native',
-              avatar: 'https://placeimg.com/140/140/any',
-            },
-           },
-           {
-            _id: 2,
-            text: 'Welcome to the Forum',
-            createdAt: new Date(),
-            system: true,
-           },
-           {
-            _id: 3,
-            text: this.state.name + ' ' + 'has entered the chat',
-            createdAt: new Date(),
-            system: true,
-           }
-        ],
-      });
-
-    // This takes a snapshot of the collection, orders it by creation date, and sends it to this.onCollectionUpdate
-    this.messageSnapshot = this.chatroomMessages.orderBy('createdAt').onSnapshot(this.onCollectionUpdate);
+  // puts messages from async into message state.
+  async getMessages() {
+    let messages = '';
+  try {
+    messages = await AsyncStorage.getItem('messages') || [];
+    this.setState({
+      messages: JSON.parse(messages)
     });
+  } catch (error) {
+    console.log(error.message);
+  }
+  }
+
+  // deletes messages from async and the message state
+  async deleteMessages() {
+    try {
+      await AsyncStorage.removeItem('messages');
+      this.setState({
+        messages: []
+      })
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  componentDidMount() {
+    NetInfo.fetch().then(connection => {
+      if (connection.isConnected) {
+        console.log('online');
+
+        // This function connects to the chatroom object
+        this.chatroomMessages = firebase.firestore().collection('chatroom')
+
+        // This authorizes the user anonymoussly
+        this.auth = firebase.auth().onAuthStateChanged(async (user) => {
+          if (!user) {
+            await firebase.auth().signInAnonymously();
+          }
+        
+          //update user state with currently active user data
+          this.setState({
+            uid: user.uid,
+            messages: [
+              {
+                _id: 1,
+                text: 'Hello' + ' ' + this.state.name,
+                createdAt: new Date(),
+                user: {
+                  _id: 2,
+                  name: 'React Native',
+                  avatar: 'https://placeimg.com/140/140/any',
+                },
+               },
+               {
+                _id: 2,
+                text: 'Welcome to the Forum',
+                createdAt: new Date(),
+                system: true,
+               },
+               {
+                _id: 3,
+                text: this.state.name + ' ' + 'has entered the chat',
+                createdAt: new Date(),
+                system: true,
+               }
+            ]
+          });
+
+        // This takes a snapshot of the collection, orders it by creation date, and sends it to this.onCollectionUpdate
+        this.messageSnapshot = this.chatroomMessages.orderBy('createdAt').onSnapshot(this.onCollectionUpdate);
+        });
+          } else {
+            console.log('offline');
+            this.getMessages()
+          }
+        });
   }
   
   componentWillUnmount() {
-  this.authUnsubscribe()
+  this.auth()
   this.messageSnapshot()
  }
 
@@ -110,11 +148,24 @@ export default class Chat extends React.Component {
    }
  }
 
+//  Store messages in Async.
+ async saveMessages() {
+  try {
+    await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
 // function to send the messages in the message state to chat.
   onSend(messages = []) {
+    console.log("fired")
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
-    }))
+    }), () => {
+      this.saveMessages()
+    },
+    )
     this.addMessages(messages);
   }
 // changes the speach bubble to set a color, in this case black.""
@@ -124,11 +175,22 @@ export default class Chat extends React.Component {
         {...props}
         wrapperStyle={{
           right: {
-            backgroundColor: '#000'
+            backgroundColor: 'red'
           }
         }}
       />
     )
+  }
+
+  renderInputToolbar(props) {
+    if (this.state.isConnected == false) {
+    } else {
+      return(
+        <InputToolbar
+        {...props}
+        />
+      );
+    }
   }
   
   render() {
@@ -136,6 +198,7 @@ export default class Chat extends React.Component {
       let { name } = this.props.route.params; 
       this.props.navigation.setOptions({ title: name });
 
+      // console.log(this.state.messages)
       return (
         // wraps the return in a single wrapper. Style is needed for View to render.
        <View style={{
@@ -145,6 +208,7 @@ export default class Chat extends React.Component {
          {/* The actual chatroom component */}
          <GiftedChat
             renderBubble={this.renderBubble.bind(this)}
+            renderInputToolbar={this.renderInputToolbar}
             messages={this.state.messages}
             onSend={messages => {
               this.onSend(messages)
@@ -152,7 +216,13 @@ export default class Chat extends React.Component {
             user={{
               _id: this.state.uid,
             }}
-          />      
+          />
+          <Button
+          onPress={() => {
+            this.deleteMessages()
+          }}
+          title="Delete"
+          ></Button>      
        </View>       
     ) 
   }
