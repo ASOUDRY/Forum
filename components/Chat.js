@@ -15,6 +15,7 @@ export default class Chat extends React.Component {
     this.state = {
       messages: [],
       name:  this.props.route.params.name,
+      test: "error"
     }
 
     let firebaseConfig = {
@@ -66,6 +67,12 @@ export default class Chat extends React.Component {
       if (connection.isConnected) {
         console.log('online');
 
+        this.setState({
+          connected: true
+        })
+
+        console.log(this.state.isConnected)
+
         // This function connects to the chatroom object
         this.chatroomMessages = firebase.firestore().collection('chatroom')
 
@@ -108,6 +115,11 @@ export default class Chat extends React.Component {
         this.messageSnapshot = this.chatroomMessages.orderBy('createdAt').onSnapshot(this.onCollectionUpdate);
         });
           } else {
+
+            this.setState({
+              connected: false
+            })
+
             console.log('offline');
             this.getMessages()
           }
@@ -182,7 +194,8 @@ export default class Chat extends React.Component {
     )
   }
 
-  renderInputToolbar(props) {
+  renderInputToolbar = (props) => {
+    console.log(this.state.isConnected)
     if (this.state.isConnected == false) {
     } else {
       return(
@@ -192,6 +205,15 @@ export default class Chat extends React.Component {
       );
     }
   }
+
+  // renderInputToolbar = (props) => {
+  //   console.log(this.state.test)
+  //   return(
+  //           <InputToolbar
+  //           {...props}
+  //           />
+  //         );
+  // }
   
   render() {
     // sets name on the top of the chatroom
