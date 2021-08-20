@@ -3,6 +3,9 @@ import React from 'react';
 import { View, KeyboardAvoidingView, Button } from 'react-native';
 import NetInfo from "@react-native-community/netinfo";
 
+import MapView from 'react-native-maps';
+
+import CustomActions from './CustomActions';
 
 import { AsyncStorage } from 'react-native';
 
@@ -131,7 +134,14 @@ export default class Chat extends React.Component {
   this.messageSnapshot()
  }
 
-//  Function that adds new messages to the collection
+
+addImages(url) {
+  this.chatroomMessages.add({
+    image: url
+  })
+}
+
+ //  Function that adds new messages to the collection
  addMessages(messages) {
    this.chatroomMessages.add({
      _id: messages[0]._id,
@@ -171,7 +181,7 @@ export default class Chat extends React.Component {
 
 // function to send the messages in the message state to chat.
   onSend(messages = []) {
-    console.log("fired")
+    console.log(this)
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }), () => {
@@ -206,14 +216,30 @@ export default class Chat extends React.Component {
     }
   }
 
-  // renderInputToolbar = (props) => {
-  //   console.log(this.state.test)
-  //   return(
-  //           <InputToolbar
-  //           {...props}
-  //           />
-  //         );
-  // }
+  renderCustomActions = (props) => {
+    return <CustomActions {...props} />;
+  };
+
+  renderCustomView (props) {
+    const { currentMessage} = props;
+    if (currentMessage.location) {
+      return (
+          <MapView
+            style={{width: 150,
+              height: 100,
+              borderRadius: 13,
+              margin: 3}}
+            region={{
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+          />
+      );
+    }
+    return null;
+  }
   
   render() {
     // sets name on the top of the chatroom
@@ -229,10 +255,12 @@ export default class Chat extends React.Component {
          <KeyboardAvoidingView behavior="height" />
          {/* The actual chatroom component */}
          <GiftedChat
-            renderBubble={this.renderBubble.bind(this)}
-            renderInputToolbar={this.renderInputToolbar}
-            messages={this.state.messages}
-            onSend={messages => {
+          renderCustomView={this.renderCustomView}
+          renderActions={this.renderCustomActions}
+          renderBubble={this.renderBubble.bind(this)}
+          renderInputToolbar={this.renderInputToolbar}
+          messages={this.state.messages}
+          onSend={messages => {
               this.onSend(messages)
             }}
             user={{
