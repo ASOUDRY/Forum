@@ -10,55 +10,64 @@ import 'firebase/storage'
 export default class CustomActions extends React.Component {
      // upload image to Storage with XMLHttpRequest
   uploadImage = async(uri) => {
-    const blob = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function() {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function(e) {
-        console.log(e);
-        reject(new TypeError('Network request failed'));
-      };
-      xhr.responseType = 'blob';
-      xhr.open('GET', uri, true);
-      xhr.send(null);
-    });
-
-    const splitUri = uri.split('/');
-    const imageName = splitUri[splitUri.length - 1];
-
-    console.log(imageName);
-
-    const ref = firebase
-      .storage()
-      .ref()
-      .child(`myImages/${imageName}`);
-          
-    const snapshot = await ref.put(blob);
-    blob.close();
-    return await snapshot.ref.getDownloadURL();
+    try{
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function(e) {
+          console.log(e);
+          reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', uri, true);
+        xhr.send(null);
+      });
+  
+      const splitUri = uri.split('/');
+      const imageName = splitUri[splitUri.length - 1];
+  
+      console.log(imageName);
+  
+      const ref = firebase
+        .storage()
+        .ref()
+        .child(`myImages/${imageName}`);
+            
+      const snapshot = await ref.put(blob);
+      blob.close();
+      return await snapshot.ref.getDownloadURL();
+    }
+    catch (error)  {
+      console.log(error.message);
+    }
   }
 
-  
-    pickImage = async () => {
-        const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-        if(status === 'granted') {
-          let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: 'Images',
-          }).catch(error => console.log(error));
+  pickImage = async () => {
+    try {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+      if(status === 'granted') {
+        let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: 'Images',
+        }).catch(error => console.log(error));
      
-          if (!result.cancelled) {
+      if (!result.cancelled) {
             const imageUrlLink = result.uri;
             this.uploadImage(result.uri);
             this.props.onSend({ image: imageUrlLink })
             this.props.addImages(imageUrlLink);
-          }
-        }
       }
+      }
+  }
+    catch (error) {
+      console.log(error.message);
+    }
+  }
 
-      getLocation = async () => {
+  getLocation = async () => {
+    try {
         const { status } = await Permissions.askAsync(Permissions.LOCATION);
- 
         if(status === 'granted') {
           let result = await Location.getCurrentPositionAsync({});
           if (result) {
@@ -67,42 +76,55 @@ export default class CustomActions extends React.Component {
                   longitude: result.coords.longitude,
                   latitude: result.coords.latitude,
                 },
-              });
+            });
           }
         }
-      }
+    }
+    catch (error) {
+        console.log(error.message);
+    }
+  }
       
-        takePhoto = async () => {
-          const { cameraStatus } = await Permissions.askAsync(Permissions.CAMERA);
-  
-            let result = await ImagePicker.launchCameraAsync({
+  takePhoto = async () => {
+    try {
+        const { cameraStatus } = await Permissions.askAsync(Permissions.CAMERA);
+        let result = await ImagePicker.launchCameraAsync({
               mediaTypes: 'Images',
-            }).catch(error => console.log(error));
-            const imageUrlLink = result.uri;
-            this.uploadImage(result.uri);
-            this.props.onSend({ image: imageUrlLink });
-        }
+        }).catch(error => console.log(error));
+        const imageUrlLink = result.uri;
+        this.uploadImage(result.uri);
+        this.props.onSend({ image: imageUrlLink });
+    }
+    catch (error) {
+        console.log(error.message);
+    }
+  }
         
   onActionsPress = () => {
     const options = ['Choose From Library', 'Take Picture', 'Send Location', 'Cancel'];
     const cancelButtonIndex = options.length - 1;
-    this.context.actionSheet().showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-      },
-      async (buttonIndex) => {
-        switch (buttonIndex) {
-          case 0:
-            return this.pickImage() ;
-          case 1:
-            return this.takePhoto();
-          case 2:
-            return this.getLocation();
-          default:
-        }
-      },
-    );
+    try {
+      this.context.actionSheet().showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+        },
+        async (buttonIndex) => {
+          switch (buttonIndex) {
+            case 0:
+              return this.pickImage() ;
+            case 1:
+              return this.takePhoto();
+            case 2:
+              return this.getLocation();
+            default:
+          }
+        },
+      );
+    }
+    catch (error) {
+      console.log(error.message);
+    }
   };
 
   render() {
