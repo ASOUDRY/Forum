@@ -10,8 +10,7 @@ export default class Start extends React.Component {
           name: '',
           color: '' };
       }
-
-      
+        
   render() {
     // button that triggers Onpress to go to the next page.
     const AppButton = ({ onPress, title }) => (
@@ -21,7 +20,7 @@ export default class Start extends React.Component {
     );
     return (
       // the background element
-      <ImageBackground source={require('../assets/background.png')} style={styles.backImage}>
+      <ImageBackground source={require(`../assets/background.png`)} style={styles.backImage}>
         <Text style={styles.title} >Forum</Text>
         <View style={styles.container}>
 
@@ -32,6 +31,7 @@ export default class Start extends React.Component {
             {name}
             )}
           value={this.state.name}
+          // template literal does not work
           placeholder='Enter your Username'
         />
          <Text style={styles.text}>
@@ -58,7 +58,7 @@ export default class Start extends React.Component {
         </View>
         {/* the actual button when rendered */}
         <AppButton size="sm" backgroundColor="#007bff" 
-        title="Enter the Forum"
+        title='Enter the Forum'
         onPress={() => this.props.navigation.navigate('Chat', {name: this.state.name, color: this.state.name})}
         />
       </View>
