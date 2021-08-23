@@ -41,7 +41,7 @@ export default class Chat extends React.Component {
   }
 
   // puts messages from async into message state.
-  async getMessages() {
+  getMessages = async () => {
     let messages = '';
   try {
     messages = await AsyncStorage.getItem('messages') || [];
@@ -54,7 +54,7 @@ export default class Chat extends React.Component {
   }
 
   // deletes messages from async and the message state
-  async deleteMessages() {
+  deleteMessages = async () => {
     try {
       await AsyncStorage.removeItem('messages');
       this.setState({
@@ -68,13 +68,10 @@ export default class Chat extends React.Component {
   componentDidMount() {
     NetInfo.fetch().then(connection => {
       if (connection.isConnected) {
-        console.log('online');
-
+       
         this.setState({
           connected: true
         })
-
-        console.log(this.state.isConnected)
 
         // This function connects to the chatroom object
         this.chatroomMessages = firebase.firestore().collection('chatroom')
@@ -91,7 +88,7 @@ export default class Chat extends React.Component {
             messages: [
               {
                 _id: 1,
-                text: 'Hello' + ' ' + this.state.name,
+                text: `Hello ${this.state.name}`,
                 createdAt: new Date(),
                 user: {
                   _id: 2,
@@ -101,13 +98,13 @@ export default class Chat extends React.Component {
                },
                {
                 _id: 2,
-                text: 'Welcome to the Forum',
+                text: `Welcome to the Forum`,
                 createdAt: new Date(),
                 system: true,
                },
                {
                 _id: 3,
-                text: this.state.name + ' ' + 'has entered the chat',
+                text: `${this.state.name} has entered the chat`,
                 createdAt: new Date(),
                 system: true,
                }
@@ -118,11 +115,9 @@ export default class Chat extends React.Component {
         this.messageSnapshot = this.chatroomMessages.orderBy('createdAt').onSnapshot(this.onCollectionUpdate);
         });
           } else {
-
             this.setState({
               connected: false
             })
-
             console.log('offline');
             this.getMessages()
           }
@@ -135,14 +130,14 @@ export default class Chat extends React.Component {
  }
 
 
-addImages(url) {
+addImages = (url) => {
   this.chatroomMessages.add({
     image: url
   })
 }
 
  //  Function that adds new messages to the collection
- addMessages(messages) {
+ addMessages = (messages) => {
    this.chatroomMessages.add({
      _id: messages[0]._id,
      createdAt: messages[0].createdAt,
@@ -171,7 +166,7 @@ addImages(url) {
  }
 
 //  Store messages in Async.
- async saveMessages() {
+ saveMessages = async () => {
   try {
     await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
   } catch (error) {
@@ -180,8 +175,7 @@ addImages(url) {
 }
 
 // function to send the messages in the message state to chat.
-  onSend(messages = []) {
-    console.log(this)
+  onSend = (messages = []) => {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }), () => {
@@ -191,7 +185,7 @@ addImages(url) {
     this.addMessages(messages);
   }
 // changes the speach bubble to set a color, in this case black.""
-  renderBubble(props) {
+  renderBubble = (props) => {
     return (
       <Bubble
         {...props}
@@ -205,7 +199,6 @@ addImages(url) {
   }
 
   renderInputToolbar = (props) => {
-    console.log(this.state.isConnected)
     if (this.state.isConnected == false) {
     } else {
       return(
@@ -220,7 +213,7 @@ addImages(url) {
     return <CustomActions {...props} />;
   };
 
-  renderCustomView (props) {
+  renderCustomView = (props) => {
     const { currentMessage} = props;
     if (currentMessage.location) {
       return (
@@ -246,7 +239,6 @@ addImages(url) {
       let { name } = this.props.route.params; 
       this.props.navigation.setOptions({ title: name });
 
-      // console.log(this.state.messages)
       return (
         // wraps the return in a single wrapper. Style is needed for View to render.
        <View style={{
