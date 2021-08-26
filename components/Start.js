@@ -12,6 +12,7 @@ export default class Start extends React.Component {
       }
         
   render() {
+    let test=`it's fine`
     // button that triggers Onpress to go to the next page.
     const AppButton = ({ onPress, title }) => (
       <TouchableOpacity onPress={onPress} style={styles.appButtonContainer}>
@@ -25,14 +26,11 @@ export default class Start extends React.Component {
         <View style={styles.container}>
 
           {/* Name input box */}
+
         <TextInput styles={styles.nameBox}
-         
-          onChangeText={(name) => this.setState(
-            {name}
-            )}
+          onChangeText={(name) => this.setState({name})}
           value={this.state.name}
-          // template literal does not work
-          placeholder='Enter your Username'
+          placeholder='Enter your Name'
         />
          <Text style={styles.text}>
           Choose Background Color:
