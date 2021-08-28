@@ -25,8 +25,7 @@ export default class Start extends React.Component {
         <Text style={styles.title} >Forum</Text>
         <View style={styles.container}>
 
-          {/* Name input box */}
-
+        {/* Name input box */}
         <TextInput styles={styles.nameBox}
           onChangeText={(name) => this.setState({name})}
           value={this.state.name}
@@ -57,7 +56,7 @@ export default class Start extends React.Component {
         {/* the actual button when rendered */}
         <AppButton size="sm" backgroundColor="#007bff" 
         title='Enter the Forum'
-        onPress={() => this.props.navigation.navigate('Chat', {name: this.state.name, color: this.state.name})}
+        onPress={() => this.props.navigation.navigate('Chat', {name: this.state.name, color: this.state.color})}
         />
       </View>
       </ImageBackground>
