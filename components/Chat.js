@@ -129,20 +129,16 @@ export default class Chat extends React.Component {
   this.messageSnapshot()
  }
 
-
-addImages = (url) => {
-  this.chatroomMessages.add({
-    image: url
-  })
-}
-
  //  Function that adds new messages to the collection
  addMessages = (messages) => {
+   console.log(messages)
    this.chatroomMessages.add({
      _id: messages[0]._id,
      createdAt: messages[0].createdAt,
-     text: messages[0].text,
-     user: messages[0].user
+     text: messages[0].text || "",
+     user: messages[0].user,
+     image: messages[0].image || "",
+     location: messages[0].location || null,
    })
  }
 // function that adds messages from the collection to the state
@@ -156,8 +152,10 @@ addImages = (url) => {
          messages: GiftedChat.append(previousState.messages, {
            _id: data._id,
            createdAt: data._createdAt,
-           text: data.text,
+           text: data.text || "",
            user: data.user,
+           image: data.image || "",
+           location: data.location || null,
          }),
        }));
        }
@@ -237,12 +235,18 @@ addImages = (url) => {
   render() {
     // sets name on the top of the chatroom
       let { name } = this.props.route.params; 
+      let color = this.props.route.params.color
+
+      console.log(color);
       this.props.navigation.setOptions({ title: name });
 
       return (
         // wraps the return in a single wrapper. Style is needed for View to render.
        <View style={{
-        height: '100%', width: '100%'}} >
+        height: '100%', 
+        width: '100%',
+        backgroundColor: color
+        }} >
           {/* Fixes height for for Android phones and Ioss Ipad */}
          <KeyboardAvoidingView behavior="height" />
          {/* The actual chatroom component */}
