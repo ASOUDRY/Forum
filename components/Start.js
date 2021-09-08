@@ -17,7 +17,7 @@ export default class Start extends React.Component {
      * 
      * @param {function} onPress - The onpress function
      * @param {string} title - The title element which is filled in
-     * @returns - The text element 
+     * @returns {method} Text
      */
     const AppButton = ({ onPress, title }) => (
       <TouchableOpacity onPress={onPress} style={styles.appButtonContainer}>

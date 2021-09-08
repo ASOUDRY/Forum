@@ -52,6 +52,12 @@ export default class CustomActions extends React.Component {
     }
   }
 
+  /**
+   * test function
+   * @async
+   * @property {function} pickImage A function that triggers the ImagePicker component
+   * @return {function} ImagePicker.launchImageLibraryAsync
+   */
   pickImage = async () => {
     try {
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
