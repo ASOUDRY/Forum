@@ -21,6 +21,7 @@ export default class Chat extends React.Component {
       test: "error"
     }
 
+    // firebase configuration
     let firebaseConfig = {
     apiKey: "AIzaSyBRDZym0HeoUzADYSuRtCxkrhY5f32Hqbs",
     authDomain: "forum-292a4.firebaseapp.com",
@@ -66,9 +67,9 @@ export default class Chat extends React.Component {
   }
 
   componentDidMount() {
+    // This checks if the app is offline.
     NetInfo.fetch().then(connection => {
       if (connection.isConnected) {
-       
         this.setState({
           connected: true
         })
@@ -85,6 +86,7 @@ export default class Chat extends React.Component {
           //update user state with currently active user data
           this.setState({
             uid: user.uid,
+            // preloads initial messages
             messages: [
               {
                 _id: 1,
@@ -131,7 +133,6 @@ export default class Chat extends React.Component {
 
  //  Function that adds new messages to the collection
  addMessages = (messages) => {
-   console.log(messages)
    this.chatroomMessages.add({
      _id: messages[0]._id,
      createdAt: messages[0].createdAt,
@@ -206,6 +207,7 @@ export default class Chat extends React.Component {
       );
     }
   }
+
 
   renderCustomActions = (props) => {
     return <CustomActions {...props} />;

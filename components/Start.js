@@ -12,8 +12,13 @@ export default class Start extends React.Component {
       }
         
   render() {
-    let test=`it's fine`
-    // button that triggers Onpress to go to the next page.
+    /**
+     * This creeates a clickable, customazable app button
+     * 
+     * @param {function} onPress - The onpress function
+     * @param {string} title - The title element which is filled in
+     * @returns - The text element 
+     */
     const AppButton = ({ onPress, title }) => (
       <TouchableOpacity onPress={onPress} style={styles.appButtonContainer}>
         <Text style={styles.appButtonText}>{title}</Text>
@@ -34,7 +39,7 @@ export default class Start extends React.Component {
          <Text style={styles.text}>
           Choose Background Color:
         </Text>
-        {/* The foor buttons to choose the background style. Choosing color is still not operational though */}
+        {/* The foor buttons to choose the background style. */}
         <View style={styles.colorSelection}>
           <TouchableOpacity
             onPress={() => this.setState({ color: '#090C08'})}
