@@ -81,3 +81,5 @@ Go to firebase https://firebase.google.com/
 ### 2. Open up Android Studio go to Configure and click Android Virtual Device(AVD). Choose your configurations,(default) is fine. Press the play button under actions.
 
 # For further questions contact the author at soudryalex@gmail.com
+
+## Trello Link [Here](https://trello.com/b/miHQyw1d/native-mobile-chat-app)
