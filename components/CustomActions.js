@@ -7,16 +7,14 @@ import * as Location from 'expo-location';
 import firebase from 'firebase';
 import 'firebase/storage'
 
-export default class CustomActions extends React.Component {
-     // upload image to Storage with XMLHttpRequest
-
-     /**
-      * This takes the uri from the camera or photostorage and pushes it to storage before returning a snapshot of the url
-      * 
-      * @await
-      * @param {uri} uri 
-      * @returns @await @method snapshot.ref.getDownloadURL()
-      */
+export default class CustomActions extends React.Component {  
+  /**
+   * upload image to Storage with XMLHttpRequest
+   * @async
+   * @function uploadImage
+   * @param {string} uri The uri passed from pick Image, and take photo
+   * @returns {string} 
+   */
   uploadImage = async(uri) => {
     try{
       const blob = await new Promise((resolve, reject) => {
@@ -53,10 +51,10 @@ export default class CustomActions extends React.Component {
   }
 
   /**
-   * test function
+   * Access the camera  and send a url
    * @async
-   * @property {function} pickImage A function that triggers the ImagePicker component
-   * @return {function} ImagePicker.launchImageLibraryAsync
+   * @function pickImage
+   * @returns {string} imageUrlLink
    */
   pickImage = async () => {
     try {
@@ -79,6 +77,12 @@ export default class CustomActions extends React.Component {
     }
   }
 
+  /**
+   * Access the camera roll and selects a image.
+   * @async
+   * @function getLocation
+   * @returns {integer}
+   */
   getLocation = async () => {
     try {
         const { status } = await Permissions.askAsync(Permissions.LOCATION);
@@ -98,7 +102,13 @@ export default class CustomActions extends React.Component {
         console.log(error.message);
     }
   }
-      
+  
+  /**
+   * Access the camera and takes a photo
+   * @async
+   * @function takePhoto
+   * @returns {string}
+   */
   takePhoto = async () => {
     try {
         const { cameraStatus } = await Permissions.askAsync(Permissions.CAMERA);
@@ -114,6 +124,11 @@ export default class CustomActions extends React.Component {
     }
   }
         
+  /**
+   * Creates the four buttons, which link to their respective functions.
+   * @function onActionsPress
+   * @returns {actionSheet}
+   */
   onActionsPress = () => {
     const options = ['Choose From Library', 'Take Picture', 'Send Location', 'Cancel'];
     const cancelButtonIndex = options.length - 1;
